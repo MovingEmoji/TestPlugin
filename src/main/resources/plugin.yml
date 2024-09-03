@@ -1,0 +1,7 @@
+name: TestPlugin
+version: 1.0
+main: jp.nagua.Main
+commands:
+    ping:
+        description: show your ping.
+        usage: /ping
