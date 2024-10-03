@@ -5,3 +5,7 @@ commands:
     ping:
         description: show your ping.
         usage: /ping
+    team:
+        description: team command
+        usage: /team [set/clear] [playerName] [red/blue]
+depend: [ ProtocolLib ]

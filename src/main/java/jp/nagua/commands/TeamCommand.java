@@ -14,8 +14,14 @@ public class TeamCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if(args.length == 3) {
-            return true;
+        if(args.length >= 1) {
+            if(args[0].equals("set")) {
+                if(args.length >= 2) {
+
+                }
+            } else if(args[0].equals("clear")) {
+
+            }
         }
         return false;
     }

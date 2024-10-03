@@ -1,5 +1,7 @@
 package jp.nagua.elements;
 
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -23,6 +25,8 @@ public class Team {
         this.color = color;
         this.name = name;
         this.players = new ArrayList<>();
+        Bukkit.getScoreboardManager().getMainScoreboard().registerNewTeam(name);
+        Bukkit.getScoreboardManager().getMainScoreboard().getTeam(name).setPrefix(ChatColor.GRAY + "[" + name + ChatColor.GRAY + "]" + ChatColor.RESET);
     }
 
     public void addPlayer(Player player) {
