@@ -17,6 +17,8 @@ import org.apache.logging.log4j.core.net.Protocol;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Server;
+import org.bukkit.craftbukkit.v1_8_R3.CraftServer;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
@@ -38,8 +40,7 @@ public class Main extends JavaPlugin {
 
     public static Scoreboard scoreboard;
 
-    public static ConcurrentMap<Player , PacketArmorStand> standMap = new ConcurrentHashMap<>();
-    public static ConcurrentMap<PacketArmorStand, PacketContainer> packetMap = new ConcurrentHashMap<>();
+    public static ConcurrentMap<Integer , PacketArmorStand> standMap = new ConcurrentHashMap<>();
 
     @Override
     public void onEnable() {
@@ -69,35 +70,62 @@ public class Main extends JavaPlugin {
             }
         });
         thread.start();
-        PacketType[] packets = {
-                PacketType.Play.Client.POSITION,
-                PacketType.Play.Client.POSITION_LOOK
-        };
+
         ProtocolManager manager = ProtocolLibrary.getProtocolManager();
+//        manager.addPacketListener(new PacketAdapter(
+//                getPlugin(),
+//                ListenerPriority.MONITOR,
+//                packets
+//        ) {
+//            @Override
+//            public void onPacketReceiving(PacketEvent event) {
+//                for(Player player : getServer().getOnlinePlayers()) {
+//                    if(event.getPlayer() != player) {
+//                        double x = event.getPacket().getDoubles().read(0);
+//                        double y = event.getPacket().getDoubles().read(1);
+//                        double z = event.getPacket().getDoubles().read(2);
+//                        standMap.get(event.getPlayer()).sendTeleport(player, new Location(event.getPlayer().getWorld(), x, y, z,0 ,0));
+//                        PacketPlayOutEntityTeleport packet = new PacketPlayOutEntityTeleport(
+//                                ((CraftPlayer) event.getPlayer()).getHandle().getId(),
+//                                MathHelper.floor(x * 32.0),
+//                                MathHelper.floor(y * 32.0),
+//                                MathHelper.floor(z * 32.0),
+//                                (byte)((int)(event.getPlayer().getLocation().getYaw() * 256.0F / 360.0F)),
+//                                (byte)((int)(event.getPlayer().getLocation().getPitch() * 256.0F / 360.0F)),
+//                                event.getPlayer().isOnGround()
+//                        );
+//                        //((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+//                    }
+//                }
+//            }
+//        });
+        PacketType[] packets = {
+                PacketType.Play.Server.REL_ENTITY_MOVE,
+                PacketType.Play.Server.REL_ENTITY_MOVE_LOOK,
+                //PacketType.Play.Server.ENTITY_TELEPORT
+        };
         manager.addPacketListener(new PacketAdapter(
                 getPlugin(),
                 ListenerPriority.MONITOR,
                 packets
         ) {
             @Override
-            public void onPacketReceiving(PacketEvent event) {
-                for(Player player : getServer().getOnlinePlayers()) {
-                    if(event.getPlayer() != player) {
-                        double x = event.getPacket().getDoubles().read(0);
-                        double y = event.getPacket().getDoubles().read(1);
-                        double z = event.getPacket().getDoubles().read(2);
-                        standMap.get(event.getPlayer()).sendTeleport(player, new Location(event.getPlayer().getWorld(), x, y, z,0 ,0));
-                        PacketPlayOutEntityTeleport packet = new PacketPlayOutEntityTeleport(
-                                ((CraftPlayer) event.getPlayer()).getHandle().getId(),
-                                MathHelper.floor(x * 32.0),
-                                MathHelper.floor(y * 32.0),
-                                MathHelper.floor(z * 32.0),
-                                (byte)((int)(event.getPlayer().getLocation().getYaw() * 256.0F / 360.0F)),
-                                (byte)((int)(event.getPlayer().getLocation().getPitch() * 256.0F / 360.0F)),
-                                event.getPlayer().isOnGround()
-                        );
-                        //((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
-                    }
+            public void onPacketSending(PacketEvent event) {
+                if(standMap.get(event.getPacket().getIntegers().read(0)) != null) {
+
+                    standMap.get(event.getPacket().getIntegers().read(0)).sendMove(event.getPlayer(), event.getPacket().getBytes().read(0), event.getPacket().getBytes().read(1), event.getPacket().getBytes().read(2));
+                }
+            }
+        });
+        manager.addPacketListener(new PacketAdapter(
+                getPlugin(),
+                ListenerPriority.MONITOR,
+                PacketType.Play.Server.ENTITY_TELEPORT
+        ) {
+            @Override
+            public void onPacketSending(PacketEvent event) {
+                if(standMap.get(event.getPacket().getIntegers().read(0)) != null) {
+                    standMap.get(event.getPacket().getIntegers().read(0)).sendTeleport(event.getPlayer(), event.getPacket().getIntegers().read(1), MathHelper.floor(((double) event.getPacket().getIntegers().read(2) / 32.0 + 0.2) * 32.0), event.getPacket().getIntegers().read(3));
                 }
             }
         });

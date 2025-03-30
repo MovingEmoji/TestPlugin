@@ -30,8 +30,13 @@ public class PacketArmorStand {
         ((CraftPlayer) player).getHandle().playerConnection.sendPacket(metadata);
     }
 
-    public void sendTeleport(Player player, Location location) {
-        PacketPlayOutEntityTeleport packet = new PacketPlayOutEntityTeleport(stand.getId(), MathHelper.floor(location.getX() * 32.0), MathHelper.floor((location.getY() + 0.1) * 32.0), MathHelper.floor(location.getZ() * 32.0), (byte) 0, (byte) 0, true);
+    public void sendTeleport(Player player, int x, int y, int z) {
+        PacketPlayOutEntityTeleport packet = new PacketPlayOutEntityTeleport(stand.getId(), x, y + 2, z, (byte) 0, (byte) 0, true);
+        ((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+    }
+
+    public void sendMove(Player player, byte x, byte y, byte z) {
+        PacketPlayOutEntity.PacketPlayOutRelEntityMove packet = new PacketPlayOutEntity.PacketPlayOutRelEntityMove(stand.getId(), x, y, z, true);
         ((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
     }
 }

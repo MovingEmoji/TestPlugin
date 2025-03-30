@@ -5,6 +5,7 @@ import jp.nagua.commands.PacketArmorStand;
 import jp.nagua.elements.Team;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
@@ -25,12 +26,15 @@ public class EventListener implements Listener {
                 ChatColor.WHITE + Bukkit.getServer().getOnlinePlayers().size() + "/10" + ChatColor.GREEN + ")");
         PlayerAPI.initalizePlayer(event.getPlayer());
         PlayerAPI.teleportLobby(event.getPlayer());
-        PacketArmorStand stand = new PacketArmorStand(event.getPlayer().getLocation(), event.getPlayer().getName());
-        Main.standMap.put(event.getPlayer(), stand);
+        Location lc = event.getPlayer().getLocation();
+        lc.setY(lc.getY() + 0.2);
+        PacketArmorStand stand = new PacketArmorStand(lc, event.getPlayer().getName());
+        Bukkit.broadcastMessage("ID: " + event.getPlayer().getEntityId());
+        Main.standMap.put(event.getPlayer().getEntityId(), stand);
         for(Player player : Bukkit.getServer().getOnlinePlayers()) {
             if(player != event.getPlayer()) {
                 stand.sendSpawn(player);
-                Main.standMap.get(player).sendSpawn(event.getPlayer());
+                Main.standMap.get(player.getEntityId()).sendSpawn(event.getPlayer());
             }
         }
     }
